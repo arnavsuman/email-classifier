@@ -1,17 +1,20 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import joblib
-from utils import mask_pii
 import traceback
+
+from utils import mask_pii
 
 # Load model once
 model = joblib.load("model_checkpoints/tfidf_svm_model.pkl")
 
 router = APIRouter()
 
+
 class EmailRequest(BaseModel):
     input_email_body: str
+
 
 @router.post("/classify")
 def classify_email(req: EmailRequest):
@@ -30,6 +33,7 @@ def classify_email(req: EmailRequest):
             )
 
         masked_email, entities = mask_pii(raw_email)
+
         if masked_email.strip() == "":
             category = "Unknown"
         else:
@@ -40,7 +44,6 @@ def classify_email(req: EmailRequest):
                 traceback.print_exc()
                 category = "Unknown"
 
-        # Final response
         return {
             "input_email_body": raw_email,
             "list_of_masked_entities": entities,
@@ -49,8 +52,7 @@ def classify_email(req: EmailRequest):
         }
 
     except Exception as e:
-        # Generic fallback response
-        print(f" Error in classify_email: {e}")
+        print(f"Error in classify_email: {e}")
         traceback.print_exc()
         return JSONResponse(
             content={
