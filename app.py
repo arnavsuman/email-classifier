@@ -6,7 +6,7 @@ app = FastAPI(title="Email Classification API")
 # Register the /classify router
 app.include_router(router)
 
-# Add this root route to fix the 404 on /
+
 @app.get("/")
 def root():
     return {
